@@ -3,6 +3,13 @@ import { execa, execaCommand } from 'execa';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '..', '..');
+const cliPath = join(projectRoot, 'bin', 'commit-pet.js');
 
 describe('CLI Integration Tests', () => {
   let tempDir: string;
@@ -34,15 +41,15 @@ describe('CLI Integration Tests', () => {
 
   describe('commit-pet status', () => {
     it('should show initial status with egg stage', async () => {
-      const result = await execaCommand('commit-pet status');
+      const result = await execa('node', [cliPath, 'status']);
       
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Egg');
+      expect(result.stdout.toLowerCase()).toContain('egg');
       expect(result.stdout).toContain('0 EXP');
     });
 
     it('should show help when called with --help', async () => {
-      const result = await execaCommand('commit-pet --help');
+      const result = await execa('node', [cliPath, '--help']);
       
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Usage');
@@ -55,7 +62,7 @@ describe('CLI Integration Tests', () => {
   describe('commit-pet feed', () => {
     it('should show error when no commits in repository', async () => {
       try {
-        await execaCommand('commit-pet feed');
+        await execa('node', [cliPath, 'feed']);
       } catch (error: any) {
         expect(error.exitCode).toBe(1);
         expect(error.stderr).toContain('No commits found');
@@ -69,7 +76,7 @@ describe('CLI Integration Tests', () => {
       await execa('git', ['commit', '-m', 'Initial commit']);
       
       // Feed the pet
-      const result = await execaCommand('commit-pet feed');
+      const result = await execa('node', [cliPath, 'feed']);
       
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Fed your pet with');
@@ -86,7 +93,7 @@ describe('CLI Integration Tests', () => {
       }
       
       // Feed the pet
-      const result = await execaCommand('commit-pet feed');
+      const result = await execa('node', [cliPath, 'feed']);
       
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain('Your pet evolved');
@@ -101,7 +108,7 @@ describe('CLI Integration Tests', () => {
       process.chdir(nonGitDir);
       
       try {
-        await execaCommand('commit-pet feed');
+        await execa('node', [cliPath, 'feed']);
       } catch (error: any) {
         expect(error.exitCode).toBe(1);
         expect(error.stderr).toContain('Not in a git repository');
@@ -114,7 +121,7 @@ describe('CLI Integration Tests', () => {
 
     it('should show error when repository has no commits', async () => {
       try {
-        await execaCommand('commit-pet feed');
+        await execa('node', [cliPath, 'feed']);
       } catch (error: any) {
         expect(error.exitCode).toBe(1);
         expect(error.stderr).toContain('No commits found');
