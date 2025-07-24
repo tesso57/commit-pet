@@ -1,0 +1,60 @@
+{
+  "name": "@tesso/commit-pet",
+  "version": "0.1.0",
+  "description": "Commit-driven Tamagotchi for your terminal",
+  "type": "module",
+  "bin": {
+    "commit-pet": "./dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "node build.js",
+    "test": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "git",
+    "tamagotchi",
+    "cli",
+    "pet",
+    "gamification",
+    "terminal",
+    "game",
+    "commit"
+  ],
+  "author": "tesso <tesso@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tesso57/commit-pet.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tesso57/commit-pet/issues"
+  },
+  "homepage": "https://github.com/tesso57/commit-pet#readme",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "execa": "^9.5.2",
+    "ink": "^5.1.0",
+    "meow": "^13.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@types/node": "^22.16.5",
+    "@types/react": "^19.1.8",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitest/ui": "^3.2.4",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.4"
+  }
+}

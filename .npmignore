@@ -1,0 +1,23 @@
+# Source files
+src/
+tests/
+
+# Config files
+.github/
+.cckiro/
+.claude/
+tsconfig.json
+vitest.config.ts
+eslint.config.js
+.prettierrc
+build.js
+
+# Development files
+*.log
+*.tgz
+coverage/
+.DS_Store
+
+# Git files
+.git/
+.gitignore
