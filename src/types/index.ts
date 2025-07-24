@@ -34,18 +34,22 @@ export interface PetState {
 
 // Type guard for PetState
 export function isPetState(value: unknown): value is PetState {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  
+  const obj = value as Record<string, unknown>;
+  
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    'stage' in value &&
-    'exp' in value &&
-    'lastSha' in value &&
-    'updatedAt' in value &&
-    isPetStage((value as Record<string, unknown>).stage) &&
-    typeof (value as Record<string, unknown>).exp === 'number' &&
-    (value as Record<string, unknown>).exp >= 0 &&
-    ((value as Record<string, unknown>).lastSha === null || typeof (value as Record<string, unknown>).lastSha === 'string') &&
-    typeof (value as Record<string, unknown>).updatedAt === 'string'
+    'stage' in obj &&
+    'exp' in obj &&
+    'lastSha' in obj &&
+    'updatedAt' in obj &&
+    isPetStage(obj.stage) &&
+    typeof obj.exp === 'number' &&
+    obj.exp >= 0 &&
+    (obj.lastSha === null || typeof obj.lastSha === 'string') &&
+    typeof obj.updatedAt === 'string'
   );
 }
 
