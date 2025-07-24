@@ -1,75 +1,101 @@
-# 🚀 Getting Started with commit-pet
+# 🚀 commit-pet スタートガイド
 
-Welcome to commit-pet! This guide will walk you through everything you need to know to start raising your own Git-powered virtual pet.
+commit-petへようこそ！このガイドでは、Gitコミットで育てるバーチャルペットの始め方を詳しく説明します。
 
-## 📋 Prerequisites
+## 📋 必要な環境
 
-Before you begin, make sure you have:
+始める前に、以下がインストールされていることを確認してください：
 
-- **Node.js 22+** installed ([Download here](https://nodejs.org/))
-- **Git** installed on your system
-- A terminal or command prompt
+- **Node.js 22以上** ([ダウンロードはこちら](https://nodejs.org/))
+- **Git** がシステムにインストールされていること
+- ターミナルまたはコマンドプロンプト
 
-You can verify your installations:
+インストールの確認方法：
 ```bash
-node --version  # Should show v22.x.x or higher
-git --version   # Should show git version 2.x.x or higher
+node --version  # v22.x.x 以上が表示されるはず
+git --version   # git version 2.x.x 以上が表示されるはず
 ```
 
-## 🎯 Installation
+## 🎯 インストール方法
 
-### Global Installation (Recommended)
+### グローバルインストール（推奨）
 
-Install commit-pet globally to use it in any project:
+どのプロジェクトでも使えるようにグローバルインストール：
 
 ```bash
 npm install -g @tesso/commit-pet
 ```
 
-Verify the installation:
+インストールの確認：
 ```bash
 commit-pet --version
 ```
 
-### Local Installation
+### ローカルインストール（開発中のこのプロジェクトを試す場合）
 
-If you prefer to install it in a specific project:
+このリポジトリをクローンして、ローカルで開発版を試す場合：
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/tesso57/commit-pet.git
+cd commit-pet
+
+# 依存関係をインストール
+npm install
+
+# 開発モードで実行（推奨）
+npm run dev -- status
+npm run dev -- feed
+
+# グローバルにリンクする場合
+npm link
+
+# リンク後は通常のコマンドとして使用可能
+commit-pet status
+commit-pet feed
+```
+
+**注意**: 現在、ビルドされたバージョンはInkのESMモジュール互換性の問題により動作しません。開発モード（`npm run dev`）または`npm link`を使用してください。
+
+### 特定のプロジェクトにインストール
+
+特定のプロジェクトだけで使いたい場合：
 
 ```bash
 npm install --save-dev @tesso/commit-pet
 ```
 
-Then use it with npx:
+npxで実行：
 ```bash
 npx commit-pet status
 ```
 
-## 🐣 Your First Pet
+## 🐣 はじめてのペット
 
-### Step 1: Navigate to a Git Repository
+### ステップ1: Gitリポジトリに移動
 
-commit-pet works inside Git repositories. Navigate to any existing project:
+commit-petはGitリポジトリ内で動作します。既存のプロジェクトに移動：
 
 ```bash
 cd my-awesome-project
 ```
 
-Or create a new one:
+または新しいプロジェクトを作成：
 ```bash
 mkdir my-new-project
 cd my-new-project
 git init
 ```
 
-### Step 2: Check Your Pet's Status
+### ステップ2: ペットの状態を確認
 
-Run the status command to meet your pet for the first time:
+statusコマンドを実行して、初めてペットに会いましょう：
 
 ```bash
 commit-pet status
 ```
 
-You'll see your pet as an egg:
+最初は卵の状態で表示されます：
 ```
 ╭──────────────────────────────────────────────────────────────────────────╮
 │ Commit Pet Status                                                        │
@@ -87,28 +113,28 @@ Progress to next stage: 0%
 5 more commits to evolve!
 ```
 
-### Step 3: Make Your First Commit
+### ステップ3: 最初のコミットを作成
 
-Your pet grows by eating commits! Let's make one:
+ペットはコミットを食べて成長します！コミットを作ってみましょう：
 
 ```bash
-# Create a file
+# ファイルを作成
 echo "# My Project" > README.md
 
-# Stage and commit
+# ステージングしてコミット
 git add README.md
 git commit -m "Initial commit"
 ```
 
-### Step 4: Feed Your Pet
+### ステップ4: ペットにエサをあげる
 
-Now feed your pet with the commit you just made:
+作成したコミットでペットにエサをあげます：
 
 ```bash
 commit-pet feed
 ```
 
-You'll see:
+次のように表示されます：
 ```
 Fed your pet with 1 commit!
 
@@ -122,38 +148,38 @@ Fed your pet with 1 commit!
 Total EXP: 1
 ```
 
-## 📈 Growing Your Pet
+## 📈 ペットの育て方
 
-### Experience System
+### 経験値システム
 
-- Each commit = 1 experience point (EXP)
-- Your pet evolves at specific EXP thresholds:
-  - **Egg** 🥚: 0-4 EXP
-  - **Chick** 🐣: 5-14 EXP
-  - **Chicken** 🐔: 15-29 EXP
-  - **Dragon** 🐉: 30+ EXP
+- 1コミット = 1経験値（EXP）
+- 特定の経験値で進化します：
+  - **卵（Egg）** 🥚: 0-4 EXP
+  - **ヒヨコ（Chick）** 🐣: 5-14 EXP
+  - **ニワトリ（Chicken）** 🐔: 15-29 EXP
+  - **ドラゴン（Dragon）** 🐉: 30+ EXP
 
-### Feeding Strategy
+### エサやりの戦略
 
-commit-pet counts ALL commits since the last feeding, so you can:
+commit-petは前回のエサやり以降のすべてのコミットを数えるので：
 
-1. **Feed after each commit** (immediate gratification)
+1. **コミットごとにエサをあげる**（即座に満足感）
    ```bash
    git commit -m "Add feature"
    commit-pet feed
    ```
 
-2. **Feed after multiple commits** (bulk feeding)
+2. **複数コミット後にまとめてエサをあげる**（まとめてエサやり）
    ```bash
    git commit -m "Add feature A"
    git commit -m "Add feature B"
    git commit -m "Fix bug"
-   commit-pet feed  # Feeds 3 commits at once!
+   commit-pet feed  # 3コミット分を一度にあげる！
    ```
 
-### Evolution Example
+### 進化の例
 
-When your pet evolves, you'll see a special message:
+ペットが進化すると特別なメッセージが表示されます：
 
 ```bash
 commit-pet feed
@@ -173,105 +199,105 @@ Fed your pet with 4 commits!
 Total EXP: 5
 ```
 
-## 💡 Tips & Tricks
+## 💡 便利な使い方
 
-### 1. Check Progress Anytime
+### 1. いつでも進捗確認
 
-Use `commit-pet status` to check your pet without feeding:
+`commit-pet status`でエサをあげずにペットの状態を確認：
 ```bash
 commit-pet status
 ```
 
-### 2. Multiple Repositories
+### 2. 複数のリポジトリ
 
-Each repository has its own pet! You can raise different pets in different projects:
+各リポジトリごとに別々のペットを育てられます！
 ```bash
 cd project-a
-commit-pet status  # Shows project-a's pet
+commit-pet status  # project-aのペットを表示
 
 cd ../project-b
-commit-pet status  # Shows project-b's pet
+commit-pet status  # project-bのペットを表示
 ```
 
-### 3. Commit Quality
+### 3. コミットの質
 
-While each commit counts as 1 EXP regardless of size, maintaining good commit practices helps both your code and your pet:
-- Make meaningful commits
-- Use clear commit messages
-- Commit regularly to keep your pet happy!
+各コミットは大きさに関係なく1 EXPですが、良いコミット習慣はコードとペットの両方に役立ちます：
+- 意味のあるコミットを作る
+- 明確なコミットメッセージを使う
+- 定期的にコミットしてペットを幸せに！
 
-### 4. Pet State Location
+### 4. ペットの状態の保存場所
 
-Your pet's state is saved in:
+ペットの状態は以下に保存されます：
 - **macOS/Linux**: `~/.config/commit-pet/state.json`
 - **Windows**: `%APPDATA%\commit-pet\state.json`
 
-Each repository's pet is tracked by its Git repository path.
+各リポジトリのペットはGitリポジトリのパスで管理されます。
 
-## 🎮 Advanced Usage
+## 🎮 高度な使い方
 
-### Command Aliases
+### コマンドエイリアス
 
-Add aliases to your shell for quicker access:
+シェルにエイリアスを追加して素早くアクセス：
 
 ```bash
-# Add to ~/.bashrc or ~/.zshrc
+# ~/.bashrc または ~/.zshrc に追加
 alias cpf="commit-pet feed"
 alias cps="commit-pet status"
 ```
 
-### Git Hooks Integration
+### Gitフック連携
 
-Automatically feed your pet after each commit by adding a Git hook:
+Gitフックを追加して、コミット後に自動でペットにエサをあげる：
 
 ```bash
-# In your repository's .git/hooks/post-commit file:
+# リポジトリの .git/hooks/post-commit ファイルに：
 #!/bin/sh
 commit-pet feed
 ```
 
-Make it executable:
+実行可能にする：
 ```bash
 chmod +x .git/hooks/post-commit
 ```
 
-## 🐛 Troubleshooting
+## 🐛 トラブルシューティング
 
 ### "Not in a git repository!"
 
-Make sure you're in a Git repository:
+Gitリポジトリ内にいることを確認：
 ```bash
-git init  # Initialize a new repository
+git init  # 新しいリポジトリを初期化
 ```
 
 ### "No commits found in this repository!"
 
-Your repository needs at least one commit:
+リポジトリに最低1つのコミットが必要です：
 ```bash
 git add .
 git commit -m "Initial commit"
 ```
 
-### Pet State Reset
+### ペットの状態をリセット
 
-If you want to start over with a new pet:
+新しいペットで最初からやり直したい場合：
 ```bash
-# Remove the state file
+# 状態ファイルを削除
 rm ~/.config/commit-pet/state.json
 ```
 
-## 🎯 Next Steps
+## 🎯 次のステップ
 
-Now that you know the basics:
+基本がわかったら：
 
-1. **Set a goal**: Try to evolve your pet to Dragon status!
-2. **Share your pet**: Show your team members your pet's progress
-3. **Contribute**: Found a bug or have an idea? Check our [GitHub repository](https://github.com/tesso57/commit-pet)
+1. **目標を設定**: ドラゴンまで進化させてみよう！
+2. **ペットをシェア**: チームメンバーにペットの進捗を見せよう
+3. **貢献**: バグを見つけたり、アイデアがある？[GitHubリポジトリ](https://github.com/tesso57/commit-pet)をチェック
 
-## 🤝 Need Help?
+## 🤝 ヘルプが必要？
 
-- Check the main [README](../README.md) for more information
-- Open an issue on [GitHub](https://github.com/tesso57/commit-pet/issues)
-- Share your pet screenshots on social media with #commitpet
+- メインの[README](../README.md)で詳細情報を確認
+- [GitHub](https://github.com/tesso57/commit-pet/issues)でissueを開く
+- ソーシャルメディアでペットのスクリーンショットを #commitpet でシェア
 
-Happy coding and pet raising! 🎉
+楽しいコーディングとペット育成を！ 🎉

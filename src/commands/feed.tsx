@@ -1,12 +1,12 @@
 import React from 'react';
 import { render } from 'ink';
 import { Box, Text } from 'ink';
-import chalk from 'chalk';
-import { GitService } from '../services/git.js';
-import { StateService } from '../services/state.js';
-import { PetService } from '../services/pet.js';
+import { createServices } from '../services/factory.js';
 import { PetDisplay } from '../components/PetDisplay.js';
-import { FeedResult, StageInfo } from '../types/index.js';
+import { FeedResult, StageInfo, toExperiencePoints, toCommitSHA } from '../types/index.js';
+import { GitError } from '../errors/index.js';
+import { handleCommandError } from '../utils/error-handler.js';
+import { ERROR_MESSAGES, EXP_PER_COMMIT, DISPLAY } from '../constants/index.js';
 
 interface FeedUIProps {
   result: FeedResult;
@@ -20,7 +20,7 @@ const FeedUI: React.FC<FeedUIProps> = ({ result, stageInfo }) => {
     <Box flexDirection="column" paddingX={2}>
       {result.commitCount === 0 ? (
         <Box flexDirection="column" alignItems="center">
-          <Text color="yellow">No new commits since last feeding!</Text>
+          <Text color={DISPLAY.WARNING_COLOR}>No new commits since last feeding!</Text>
           <Text dimColor>Make some commits and try again.</Text>
         </Box>
       ) : (
@@ -28,7 +28,7 @@ const FeedUI: React.FC<FeedUIProps> = ({ result, stageInfo }) => {
           <Box marginBottom={1}>
             <Text>
               Fed your pet with{' '}
-              <Text bold color="green">
+              <Text bold color={DISPLAY.SUCCESS_COLOR}>
                 {result.commitCount}
               </Text>{' '}
               commit{result.commitCount > 1 ? 's' : ''}!
@@ -37,7 +37,7 @@ const FeedUI: React.FC<FeedUIProps> = ({ result, stageInfo }) => {
 
           {isEvolved && (
             <Box marginBottom={1}>
-              <Text bold color="magenta">
+              <Text bold color={DISPLAY.EVOLUTION_COLOR}>
                 🎉 Your pet evolved from {result.previousStage} to {result.currentStage}! 🎉
               </Text>
             </Box>
@@ -63,64 +63,62 @@ const FeedUI: React.FC<FeedUIProps> = ({ result, stageInfo }) => {
 };
 
 export async function feedCommand(): Promise<void> {
-  const gitService = new GitService();
-  const stateService = new StateService();
-  const petService = new PetService();
+  try {
+    const { git: gitService, state: stateService, pet: petService } = createServices();
 
-  // Check if we're in a git repository
-  const isGitRepo = await gitService.isGitRepository();
-  if (!isGitRepo) {
-    console.error(chalk.red('Error:'), 'Not in a git repository!');
-    console.log(chalk.dim('Initialize a git repository with: git init'));
-    process.exit(1);
+    // Check if we're in a git repository
+    const isGitRepo = await gitService.isGitRepository();
+    if (!isGitRepo) {
+      throw new GitError(ERROR_MESSAGES.NOT_GIT_REPO);
+    }
+
+    // Check if there are any commits
+    const hasCommits = await gitService.hasCommits();
+    if (!hasCommits) {
+      throw new GitError(ERROR_MESSAGES.NO_COMMITS);
+    }
+
+    // Load current state
+    const currentState = await stateService.load();
+
+    // Get commits since last feed
+    const commits = await gitService.getCommitsSince(currentState.lastSha);
+    const commitCount = commits.length;
+
+    // Calculate new experience
+    const newExp = toExperiencePoints(currentState.exp + (commitCount * EXP_PER_COMMIT));
+    const previousStage = currentState.stage;
+    const newStage = petService.calculateStage(newExp);
+
+    // Get latest commit SHA
+    const latestSha = toCommitSHA(await gitService.getLatestCommitSha());
+
+    // Update state
+    const newState = {
+      stage: newStage,
+      exp: newExp,
+      lastSha: latestSha,
+      updatedAt: new Date().toISOString(),
+    };
+    await stateService.save(newState);
+
+    // Prepare result
+    const result: FeedResult = {
+      previousStage,
+      currentStage: newStage,
+      commitCount,
+      experienceGained: toExperiencePoints(commitCount * EXP_PER_COMMIT),
+      totalExp: newExp,
+    };
+
+    // Get stage info for display
+    const stageInfo = petService.getStageInfo(newStage);
+
+    // Render UI
+    const { waitUntilExit } = render(<FeedUI result={result} stageInfo={stageInfo} />);
+
+    await waitUntilExit();
+  } catch (error) {
+    handleCommandError(error);
   }
-
-  // Check if there are any commits
-  const hasCommits = await gitService.hasCommits();
-  if (!hasCommits) {
-    console.error(chalk.red('Error:'), 'No commits found in this repository!');
-    console.log(chalk.dim('Make your first commit with: git commit'));
-    process.exit(1);
-  }
-
-  // Load current state
-  const currentState = await stateService.load();
-
-  // Get commits since last feed
-  const commits = await gitService.getCommitsSince(currentState.lastSha);
-  const commitCount = commits.length;
-
-  // Calculate new experience
-  const newExp = currentState.exp + commitCount;
-  const previousStage = currentState.stage;
-  const newStage = petService.calculateStage(newExp);
-
-  // Get latest commit SHA
-  const latestSha = await gitService.getLatestCommitSha();
-
-  // Update state
-  const newState = {
-    stage: newStage,
-    exp: newExp,
-    lastSha: latestSha,
-    updatedAt: new Date().toISOString(),
-  };
-  await stateService.save(newState);
-
-  // Prepare result
-  const result: FeedResult = {
-    previousStage,
-    currentStage: newStage,
-    commitCount,
-    experienceGained: commitCount,
-    totalExp: newExp,
-  };
-
-  // Get stage info for display
-  const stageInfo = petService.getStageInfo(newStage);
-
-  // Render UI
-  const { waitUntilExit } = render(<FeedUI result={result} stageInfo={stageInfo} />);
-
-  await waitUntilExit();
 }

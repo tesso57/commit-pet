@@ -29,12 +29,27 @@ Feed your virtual pet with Git commits and watch it grow! commit-pet gamifies yo
 
 ## 📦 Installation
 
+### From npm (when published)
 ```bash
 # Global installation (recommended)
 npm install -g @tesso/commit-pet
 
 # Or use with npx
 npx @tesso/commit-pet status
+```
+
+### From source (current)
+```bash
+# Clone and install
+git clone https://github.com/tesso57/commit-pet.git
+cd commit-pet
+npm install
+
+# Link globally
+npm link
+
+# Now use anywhere
+commit-pet status
 ```
 
 ## 🚀 Quick Start

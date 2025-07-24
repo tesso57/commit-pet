@@ -2,6 +2,7 @@ import meow from 'meow';
 import chalk from 'chalk';
 import { feedCommand } from './commands/feed.js';
 import { statusCommand } from './commands/status.js';
+import { handleCommandError } from './utils/error-handler.js';
 
 const cli = meow(
   `
@@ -47,8 +48,7 @@ async function main() {
         break;
     }
   } catch (error) {
-    console.error(chalk.red('Error:'), error instanceof Error ? error.message : 'Unknown error');
-    process.exit(1);
+    handleCommandError(error);
   }
 }
 

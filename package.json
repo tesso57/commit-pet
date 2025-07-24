@@ -4,7 +4,7 @@
   "description": "Commit-driven Tamagotchi for your terminal",
   "type": "module",
   "bin": {
-    "commit-pet": "./dist/cli.js"
+    "commit-pet": "./bin/commit-pet.js"
   },
   "scripts": {
     "dev": "tsx src/cli.ts",

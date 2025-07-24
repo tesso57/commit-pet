@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { StateService } from '../../../src/services/state.js';
 import { existsSync } from 'node:fs';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { toExperiencePoints, toCommitSHA } from '../../../src/types/index.js';
 
 // Mock the fs modules
 vi.mock('node:fs');
@@ -36,7 +37,7 @@ describe('StateService', () => {
       const mockState = {
         stage: 'chicken',
         exp: 20,
-        lastSha: 'abc123',
+        lastSha: 'a'.repeat(40),
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
 
@@ -49,15 +50,21 @@ describe('StateService', () => {
       expect(state).toEqual(mockState);
     });
 
-    it('should return default state when file is corrupted', async () => {
+    it('should return default state when file contains invalid JSON', async () => {
       vi.mocked(existsSync).mockReturnValue(true);
       vi.mocked(readFile).mockResolvedValue('invalid json');
       vi.mocked(mkdir).mockResolvedValue(undefined);
 
+      // Mock console.warn to verify it's called
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
       const state = await stateService.load();
 
       expect(state.stage).toBe('egg');
-      expect(state.exp).toBe(0);
+      expect(state.exp).toEqual(toExperiencePoints(0));
+      expect(consoleWarnSpy).toHaveBeenCalled();
+
+      consoleWarnSpy.mockRestore();
     });
 
     it('should return default state when state is invalid', async () => {
@@ -70,10 +77,16 @@ describe('StateService', () => {
       vi.mocked(readFile).mockResolvedValue(JSON.stringify(invalidState));
       vi.mocked(mkdir).mockResolvedValue(undefined);
 
+      // Mock console.warn to verify it's called
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
       const state = await stateService.load();
 
       expect(state.stage).toBe('egg');
-      expect(state.exp).toBe(0);
+      expect(state.exp).toEqual(toExperiencePoints(0));
+      expect(consoleWarnSpy).toHaveBeenCalled();
+
+      consoleWarnSpy.mockRestore();
     });
   });
 
@@ -81,8 +94,8 @@ describe('StateService', () => {
     it('should save state to file', async () => {
       const mockState = {
         stage: 'chick' as const,
-        exp: 10,
-        lastSha: 'def456',
+        exp: toExperiencePoints(10),
+        lastSha: toCommitSHA('d'.repeat(40)),
         updatedAt: '2024-01-02T00:00:00.000Z',
       };
 

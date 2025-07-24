@@ -1,7 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { PetState } from '../types/index.js';
+import { PetState, isPetState, toExperiencePoints } from '../types/index.js';
 import { getStateFilePath, ensureConfigDir } from '../utils/config.js';
+import { StateError, FileSystemError, ValidationError } from '../errors/index.js';
+import { getErrorMessage } from '../utils/error-handler.js';
 
 export class StateService {
   private stateFilePath: string;
@@ -19,46 +21,64 @@ export class StateService {
 
     try {
       const content = await readFile(this.stateFilePath, 'utf-8');
-      const state = JSON.parse(content) as PetState;
+      let state: unknown;
+      
+      try {
+        state = JSON.parse(content);
+      } catch (error) {
+        throw new StateError(`Failed to parse state file: ${error instanceof Error ? error.message : 'Invalid JSON'}`);
+      }
 
       // Validate the loaded state
-      if (this.isValidState(state)) {
-        return state;
+      if (isPetState(state)) {
+        // Convert exp to branded type
+        return {
+          ...state,
+          exp: toExperiencePoints(state.exp),
+        } as PetState;
       } else {
-        console.warn('Invalid state file detected, resetting to default state');
+        throw new ValidationError('Invalid state file format');
+      }
+    } catch (error) {
+      // Check for our custom errors by their code property
+      if (error instanceof Error && 'code' in error && 
+          (error.code === 'STATE_ERROR' || error.code === 'VALIDATION_ERROR')) {
+        console.warn(error.message + ', resetting to default state');
         return this.getDefaultState();
       }
-    } catch {
-      console.warn('Failed to load state file, resetting to default state');
-      return this.getDefaultState();
+      throw new FileSystemError(`Failed to read state file: ${getErrorMessage(error)}`);
     }
   }
 
   async save(state: PetState): Promise<void> {
-    await ensureConfigDir();
+    try {
+      await ensureConfigDir();
+      
+      if (!isPetState(state)) {
+        throw new ValidationError('Cannot save invalid state');
+      }
 
-    const content = JSON.stringify(state, null, 2);
-    await writeFile(this.stateFilePath, content, 'utf-8');
+      const content = JSON.stringify(state, null, 2);
+      await writeFile(this.stateFilePath, content, 'utf-8');
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw new FileSystemError(`Failed to save state: ${getErrorMessage(error)}`);
+    }
   }
 
   private getDefaultState(): PetState {
     return {
       stage: 'egg',
-      exp: 0,
+      exp: toExperiencePoints(0),
       lastSha: null,
       updatedAt: new Date().toISOString(),
     };
   }
 
-  private isValidState(state: any): state is PetState {
-    return (
-      state &&
-      typeof state === 'object' &&
-      ['egg', 'chick', 'chicken', 'dragon'].includes(state.stage) &&
-      typeof state.exp === 'number' &&
-      (state.lastSha === null || typeof state.lastSha === 'string') &&
-      typeof state.updatedAt === 'string'
-    );
+  private isValidState(state: unknown): state is PetState {
+    return isPetState(state);
   }
 
   getConfigPath(): string {

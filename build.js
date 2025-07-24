@@ -5,8 +5,8 @@ await build({
   bundle: true,
   platform: 'node',
   target: 'node22',
-  format: 'esm',
-  outfile: 'dist/cli.js',
+  format: 'cjs',
+  outfile: 'dist/cli.cjs',
   banner: {
     js: '#!/usr/bin/env node\n',
   },
